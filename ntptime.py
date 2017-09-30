@@ -8,12 +8,33 @@ import ssd1306
 i2c = machine.I2C(scl=machine.Pin(5), sda=machine.Pin(4))
 oled = ssd1306.SSD1306_I2C(64, 48, i2c) # width, height, pins
 
+#UPDATEINTERVAL = 1 
+#LASTUPDATE = 0
+
 def setTime():
+    global LASTUPDATE
+    global UPDATEINTERVAL
+    LASTUPDATE = time.time()
+    # print('lastUpdate: ' + str(LASTUPDATE))
     try:
         ntptime.settime()
-        print('succesfully updated time')
+        UPDATEINTERVAL = 300 #5mins
+        print('succesfully synced time from ntp server: ' + ntptime.host)
+        print('next update in ' + str(UPDATEINTERVAL) + ' seconds')
+        # return True
     except OSError:
+        UPDATEINTERVAL = 10 #seconds
         print('error, couldn\'t retrieve time')
+        print('trying again in ' + str(UPDATEINTERVAL) + ' seconds')
+        # return False
+
+def checkUpdate(last, interv):
+    # print('last: ' + str(last))
+    # print('interv: ' + str(interv))
+    if time.time() - (interv) > last:
+        return True
+    else:
+        return False
 
 def pad(p):
     if p < 10:
@@ -27,10 +48,16 @@ def printTime(h, m, s):
     oled.show()
 
 setTime()
+oldTime = time.time()
 
 while True:
-    print(time.localtime())
-    printTime(time.localtime()[3], time.localtime()[4], time.localtime()[5])
+    if checkUpdate(LASTUPDATE, UPDATEINTERVAL) == True:
+        setTime()
 
-    time.sleep(1)
+    if time.time() != oldTime:
+        oldTime = time.time()
+        print(time.localtime())
+        printTime(time.localtime()[3], time.localtime()[4], time.localtime()[5])
+
+    #time.sleep(1)
 
