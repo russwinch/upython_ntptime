@@ -8,14 +8,10 @@ import ssd1306
 i2c = machine.I2C(scl=machine.Pin(5), sda=machine.Pin(4))
 oled = ssd1306.SSD1306_I2C(64, 48, i2c) # width, height, pins
 
-#UPDATEINTERVAL = 1 
-#LASTUPDATE = 0
-
 def setTime():
     global LASTUPDATE
     global UPDATEINTERVAL
     LASTUPDATE = time.time()
-    # print('lastUpdate: ' + str(LASTUPDATE))
     try:
         ntptime.settime()
         UPDATEINTERVAL = 300 #5mins
@@ -29,8 +25,6 @@ def setTime():
         # return False
 
 def checkUpdate(last, interv):
-    # print('last: ' + str(last))
-    # print('interv: ' + str(interv))
     if time.time() - (interv) > last:
         return True
     else:
@@ -43,8 +37,17 @@ def pad(p):
         return str(p)
 
 def printTime(h, m, s):
+    print(time.localtime())
     oled.fill(0) # clear the screen
     oled.text(pad(h + 1) + ':' + pad(m) + ':' + pad(s), 0, 0) #hack for BST!!
+    oled.show()
+
+def printBinTime(h, m, s):
+    print(time.localtime())
+    oled.fill(0) # clear the screen
+    oled.text("{0:08b}".format(h + 1), 0, 0) #hack for BST!!
+    oled.text("{0:08b}".format(m), 0, 10)
+    oled.text("{0:08b}".format(s), 0, 20) 
     oled.show()
 
 setTime()
@@ -56,8 +59,5 @@ while True:
 
     if time.time() != oldTime:
         oldTime = time.time()
-        print(time.localtime())
-        printTime(time.localtime()[3], time.localtime()[4], time.localtime()[5])
-
-    #time.sleep(1)
-
+        # printTime(time.localtime()[3], time.localtime()[4], time.localtime()[5])
+        printBinTime(time.localtime()[3], time.localtime()[4], time.localtime()[5])
