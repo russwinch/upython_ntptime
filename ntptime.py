@@ -27,14 +27,12 @@ def setTime():
 def checkUpdate(last, interv):
     if time.time() - (interv) > last:
         return True
-    else:
-        return False
+    return False
 
 def pad(p):
     if p < 10:
         return '0' + str(p)
-    else:
-        return str(p)
+    return str(p)
 
 def printTime(h, m, s):
     print(time.localtime())
